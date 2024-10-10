@@ -1,0 +1,52 @@
+name: Terraform AWS EC2 Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Terraform Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0  # Specify your required Terraform version
+
+    # Step 3: Terraform Init
+    - name: Terraform Init
+      run: terraform init
+
+    # Step 4: Terraform Format Check
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    # Step 5: Terraform Validate
+    - name: Terraform Validate
+      run: terraform validate
+
+    # Step 6: Terraform Plan
+    - name: Terraform Plan
+      run: terraform plan
+
+    # Step 7: Apply (only on push to the main branch)
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+
+    # Step 8: Output Public IP
+    - name: Output Public IP
+      run: |
+        terraform output public_ip
+
